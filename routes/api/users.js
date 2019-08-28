@@ -14,9 +14,6 @@ router.get('/test', (req, res) => {
     });
 });
 
-/**
-  @route
-**/
 
 // @route   Post users/register
 // @desc    register user
@@ -72,6 +69,47 @@ router.post('/register', (req, res) => {
                 error: err
             });
         });
+
+});
+
+
+/*
+    @route Post users/login
+    @desc Login User/Returning JWT Token
+    @access Public
+*/
+router.post('/login', (req, res) => {
+    
+    // email, password 할당
+    const email = req.body.email;
+    const password = req.body.password;
+
+    userModel
+        .findOne({email})
+        .then(user => {
+            // 사용자 이메일이 없을 경우.
+            if (!user) {
+                return res.status(404).json({
+                    email: "not found email"
+                });
+            } else {
+                bcrypt
+                    .compare(password, user.password)
+                    .then(isMatch => {
+                        if (!isMatch) {
+                            return res.status(404).json({
+                                isMatch: "password incorrect"
+                            });
+                        } else {
+                            res.status(200).json({
+                                isMatch: "password success"
+                            });
+                        }
+                    })
+                    .catch(err => res.json(err));
+            }
+        })
+        .catch(err => res.json(err));
 
 });
 
