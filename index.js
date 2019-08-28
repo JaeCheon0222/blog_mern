@@ -3,7 +3,11 @@ const app = express();
 
 const mongoose = require('mongoose');
 
-const db = "";
+// const db = "mongodb+srv://jaecheon:epffl0128!@cluster0-1fqcl.mongodb.net/test?retryWrites=true&w=majority";
+
+// const db = "mongodb://teddykwak:k9915402@ds141294.mlab.com:41294/node-rest-shop";
+
+const db = "mongodb+srv://jaecheon:epffl0128!@cluster0-1fqcl.mongodb.net/test?retryWrites=true&w=majority";
 
 mongoose
     .connect(db, {
