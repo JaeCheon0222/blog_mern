@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const userModel = require('../../models/User');
 
 // @route: 경로, @desc: 설명, @access: 권한
@@ -101,16 +102,31 @@ router.post('/login', (req, res) => {
                                 isMatch: "password incorrect"
                             });
                         } else {
-                            res.status(200).json({
-                                isMatch: "password success"
-                            });
+                            // user matched
+                            const payload = {
+                                id: user.id,
+                                name: user.name,
+                                avatar: user.avatar
+                            };
+
+                            // sign token
+                            jwt.sign(
+                                payload,
+                                "secret",
+                                {expiresIn: 3600},
+                                (err, token) => {
+                                    res.json({
+                                        success: true,
+                                        token: "Bearer" + token
+                                    });
+                                }
+                            );
                         }
                     })
                     .catch(err => res.json(err));
             }
         })
         .catch(err => res.json(err));
-
 });
 
 module.exports = router;
