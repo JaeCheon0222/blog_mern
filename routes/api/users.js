@@ -4,6 +4,7 @@ const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require('../../models/User');
+const passport = require('passport');
 
 // @route: 경로, @desc: 설명, @access: 권한
 // @route   GET users/test
@@ -112,12 +113,12 @@ router.post('/login', (req, res) => {
                             // sign token
                             jwt.sign(
                                 payload,
-                                "secret",
+                                process.env.Secret,
                                 {expiresIn: 3600},
                                 (err, token) => {
                                     res.json({
                                         success: true,
-                                        token: "Bearer" + token
+                                        token: "Bearer " + token
                                     });
                                 }
                             );
@@ -128,5 +129,18 @@ router.post('/login', (req, res) => {
         })
         .catch(err => res.json(err));
 });
+
+// @route   GET users/current
+// @desc    Return current user
+// @access  Private
+router.get('/current', passport.authenticate('jwt', {session:false}), (req, res) => {  // 패스포트로 인증하겠다.
+
+    res.json({
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email
+    });
+});
+
 
 module.exports = router;
