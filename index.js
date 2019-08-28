@@ -3,6 +3,8 @@ const app = express();
 
 const mongoose = require('mongoose');
 
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
 // const db = "mongodb+srv://jaecheon:epffl0128!@cluster0-1fqcl.mongodb.net/test?retryWrites=true&w=majority";
 
 const db = "mongodb://teddykwak:k9915402@ds141294.mlab.com:41294/node-rest-shop";
@@ -20,6 +22,10 @@ mongoose
     .catch(err => {
         console.log("error: " + err);
     });
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extends: false}));
+app.use(morgan('dev'));
 
 const postsRouter = require('./routes/api/posts');
 const profileRouter = require('./routes/api/profile');
