@@ -8,6 +8,7 @@ const passport = require('passport');
 
 const check_auth = passport.authenticate('jwt', {session:false});
 const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
 
 // @route: 경로, @desc: 설명, @access: 권한
 // @route   GET users/test
@@ -94,26 +95,39 @@ router.post('/register', (req, res) => {
 */
 router.post('/login', (req, res) => {
     
+    const {errors, isValid}= validateLoginInput(req.body);
+
+    // check validation
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+
+
     // email, password 할당
     const email = req.body.email;
     const password = req.body.password;
+
 
     userModel
         .findOne({email})
         .then(user => {
             // 사용자 이메일이 없을 경우.
             if (!user) {
-                return res.status(404).json({
-                    email: "not found email"
-                });
+                // return res.status(404).json({
+                //     email: "not found email"
+                // });
+                errors.email = 'User not found';
+                return res.status(400).json(errors);
             } else {
                 bcrypt
                     .compare(password, user.password)
                     .then(isMatch => {
                         if (!isMatch) {
-                            return res.status(404).json({
-                                isMatch: "password incorrect"
-                            });
+                            // return res.status(404).json({
+                            //     isMatch: "password incorrect"
+                            // });
+                            errors.password = 'Password incorrect';
+                            return res.status(400).json(errors);
                         } else {
                             // user matched
                             const payload = {
