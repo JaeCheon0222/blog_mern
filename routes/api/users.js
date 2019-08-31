@@ -6,6 +6,9 @@ const jwt = require('jsonwebtoken');
 const userModel = require('../../models/User');
 const passport = require('passport');
 
+const check_auth = passport.authenticate('jwt', {session:false});
+const validateRegisterInput = require('../../validation/register');
+
 // @route: 경로, @desc: 설명, @access: 권한
 // @route   GET users/test
 // @desc    Tests users route
@@ -21,6 +24,13 @@ router.get('/test', (req, res) => {
 // @desc    register user
 // @access  Private
 router.post('/register', (req, res) => {
+    // req.body -> 사용자 입력값
+    const {errors, isValid} = validateRegisterInput(req.body);
+
+    // check validation
+    if (isValid) {
+        return res.status(400).json(errors);
+    }
 
     userModel
         // email 유무 체크. findOne은 테이블 항목에서 하나만 찾음.
@@ -28,9 +38,11 @@ router.post('/register', (req, res) => {
         .then(user => {
             if (user) {
                 // email 있을 경우. 기존 회원 가입이 되있을 경우.
-                return res.status(400).json({
-                    email: "Email already exists"
-                });
+                // return res.status(400).json({
+                //     email: "Email already exists"
+                // });
+                errors.email = 'Email already exists';
+                return res.status(400).json(errors);
             } else {
 
                 // 이미지 자동 생성 (avatar 자동 생성)
@@ -133,7 +145,7 @@ router.post('/login', (req, res) => {
 // @route   GET users/current
 // @desc    Return current user
 // @access  Private
-router.get('/current', passport.authenticate('jwt', {session:false}), (req, res) => {  // 패스포트로 인증하겠다.
+router.get('/current', check_auth, (req, res) => {  // 패스포트로 인증하겠다.
 
     res.json({
         id: req.user.id,
