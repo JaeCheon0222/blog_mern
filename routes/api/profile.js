@@ -7,6 +7,30 @@ const userModel = require('../../models/User');
 const checkAuth = passport.authenticate('jwt', {session: false});
 const validateProfileInput = require('../../validation/profile');
 
+
+/**
+ * @route GET /all
+ * @desc Get All User
+ * @access Public
+ */
+router.get('/all', (req, res) => {
+
+    profileModel
+        .find()
+        .populate('user', ['name', 'avatar'])
+        .then(profiles => {
+            if (!profiles) {
+                return res.status(400).json({
+                    msg: 'There is No Profile Info'
+                });
+            } else {
+                res.status(200).json(profiles);
+            }
+        })
+        .catch(err => res.json(err));
+
+});
+
 /**
  * @route   GET /profile
  * @desc    Get current users profile
@@ -28,6 +52,31 @@ router.get('/', checkAuth, (req, res) => {
         })
         .catch(err => res.json(err));
 });
+
+/**
+ * @route   GET /user/:user_id
+ * @desc    Get Profile by userId
+ * @access  Private
+ */
+router.get('/user/:user_id', checkAuth, (req, res) => {
+
+    const errors = {};
+
+    profileModel
+        .findOne({user: req.params.user_id})
+        .populate('user', ['name', 'avatar'])
+        .then(profile => {
+            if (!profile) {
+                return res.status(404).json({
+                    msg: 'Not Found User'
+                });
+            } else {
+                res.status(200).json(profile);
+            }
+        })
+        .catch(err => res.json(err));
+});
+
 
 /**
  * @route   POST /
