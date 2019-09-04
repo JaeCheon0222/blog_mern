@@ -24,5 +24,5 @@ const userSchema = new Schema({
     }
 });
 
-
+// 'users' -> 컬랙션
 module.exports = User = mongoose.model('users', userSchema);

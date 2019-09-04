@@ -23,13 +23,13 @@ router.get('/test', (req, res) => {
 
 // @route   Post users/register
 // @desc    register user
-// @access  Private
+// @access  Public
 router.post('/register', (req, res) => {
     // req.body -> 사용자 입력값
     const {errors, isValid} = validateRegisterInput(req.body);
 
     // check validation
-    if (isValid) {
+    if (!isValid) {
         return res.status(400).json(errors);
     }
 
