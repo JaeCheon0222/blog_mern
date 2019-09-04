@@ -29,10 +29,10 @@ router.get('/', checkAuth, (req, res) => {
 
 /**
  * @route   POST /
- * @desc    Basic Test
+ * @desc    create profile
  * @access  Private
  */
-router.post('/', checkAuth, (req, res) => {
+router.post('/register', checkAuth, (req, res) => {
     // Get fields
     const profileFields = {};
     profileFields.user = req.user.id;
@@ -56,7 +56,8 @@ router.post('/', checkAuth, (req, res) => {
     profileModel
         .findOne({user: req.user.id})
         .then(profile => {
-            profileModel
+            if (!profile) {
+                profileModel
                 .findOne({handle: profileFields.handle})
                 .then(profile => {
                     if (profile) {
@@ -71,6 +72,62 @@ router.post('/', checkAuth, (req, res) => {
                         .catch(err => res.json(err));
 
                 });
+            } else {
+                errors.noprofile = 'No user Info';
+                return res.status(404).json(errors);
+            }
+        })
+        .catch(err => res.json(err));
+});
+
+
+/**
+ * @route   PATCH /modify
+ * @desc    modify profile
+ * @access  Private
+ */
+router.patch('/', checkAuth, (req, res) => {
+
+    // Get fields
+    const profileFields = {};
+    profileFields.user = req.user.id;
+
+    if (req.body.handle) profileFields.handle = req.body.handle;
+    if (req.body.company) profileFields.company = req.body.company;
+    if (req.body.website) profileFields.website = req.body.website;
+    if (req.body.location) profileFields.location = req.body.location;
+    if (req.body.bio) profileFields.bio = req.body.bio;
+    if (req.body.status) profileFields.status = req.body.status;
+    if (req.body.githubusername) profileFields.githubusername = req.body.githubusername;
+
+    //Skills - Spilt into array
+    if (typeof req.body.skills !== 'undefined') {
+        profileFields.skills = req.body.skills.split(',');
+    }
+
+    // Social
+    profileFields.social = {};
+    
+    profileModel
+        .findOne({user: req.user.id})
+        .then(profile => {
+            if (profile) {
+                // update
+                profileModel
+
+                    .findOneAndUpdate(
+                        { user: req.user.id },
+                        { $set: profileFields },
+                        { new: true }
+                    )
+                    .then(profile => {
+                        res.json(profile);
+                    })
+                    .catch(err => res.json(err));
+            } else {   
+                errors.noprofile = 'No user Info';
+                return res.status(404).json(errors);
+            }
         })
         .catch(err => res.json(err));
 
