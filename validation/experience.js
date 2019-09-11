@@ -22,7 +22,7 @@ module.exports = function validateExperienceInput(data) {
         errors.location = 'Profile location is required'
     }
     
-    if (Validator.isEmpty(data.form)) {
+    if (Validator.isEmpty(data.from)) {
         errors.from = 'Profile form is required'
     }
 

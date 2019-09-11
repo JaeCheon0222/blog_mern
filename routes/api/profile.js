@@ -245,26 +245,6 @@ router.post('/education', checkAuth, (req, res) => {
     if (!isValid) {
         return res.status(404).json(errors);
     }
-    // profileModel.findOne({ user: req.user.id })
-    //     .then(profile => {
-    //         const newEdu = {
-    //             school: req.body.school,
-    //             degree: req.body.degree,
-    //             fieldofstudy: req.body.fieldofstudy,
-    //             from: req.body.from,
-    //             to: req.body.to,
-    //             current: req.body.current,
-    //             description: req.body.description
-    //         };
-
-    //         // Add to exp array
-    //         profile.education.unshift(newEdu);
-    //         profile
-    //             .save()
-    //             .then(profile => res.json(profile))
-    //             .catch(err => res.status(404).json(err));
-    //     })
-    //     .catch(err => res.status(404).json(err));
 
     profileModel
         // checkAuth의 return 값
@@ -293,8 +273,45 @@ router.post('/education', checkAuth, (req, res) => {
 
         })
         .catch(err => res.json(err));
-
 }); 
+
+/**
+ * @route   POST /profile/experience
+ * @desc    add experience to profile
+ * @access  Private
+*/
+router.post('/experience', checkAuth, (req, res) => {
+
+    const {errors, isValid} = validateExperienceInput(req.body);
+
+    // Check Validation
+    if (!isValid) {
+        return res.status(404).json(errors);
+    }
+
+    profileModel
+        .findOne({user: req.user.id})
+        .then(profile => {
+            const newExp = {
+                title: req.body.title,
+                company: req.body.company,
+                location: req.body.location,
+                from: req.body.from,
+                to : req.body.to,
+                current: req.body.current,
+                description: req.body.description
+            };
+
+            profile.experience.unshift(newExp);
+
+            profile
+                .save()
+                .then(profile => res.json(profile))
+                .catch(err => res.json(err));
+
+        })
+        .catch(err => res.json(err));
+});
 
 
 module.exports = router;
