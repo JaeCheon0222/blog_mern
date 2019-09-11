@@ -313,5 +313,70 @@ router.post('/experience', checkAuth, (req, res) => {
         .catch(err => res.json(err));
 });
 
+/**
+ * @route   DELETE /profile/experience/:exp_id
+ * @desc    delete experience to profile
+ * @access  Private
+*/
+router.delete('/experience/:exp_id', checkAuth, (req, res) => {
+
+    profileModel
+        .findOne({user: req.user.id})
+        .then(profile => {
+            
+            // remove
+            const removeIndex = profile.experience
+                .map(item => item._id)
+                .indexOf(req.params.exp_id);
+
+                // splice out of array
+                profile.experience.splice(removeIndex, 1);
+
+                // save
+                profile
+                    .save()
+                    .then(profile => {
+                        res.status(200).json(profile);
+                    })
+                    .catch(err => res.json(err));
+
+        })
+        .catch(err => res.json(err));
+});
+
+/**
+ * @route   DELETE /profile/education/:edu_id
+ * @desc    delete education to profile
+ * @access  Private
+*/
+router.delete('/education/:edu_id', checkAuth, (req, res) => {
+
+    profileModel
+        // 유저의 아이디 먼저 찾음
+        .findOne({user: req.user.id})
+        .then(profile => {
+
+            // remove
+            const removeIndex = profile.education
+                .map(item => item._id)
+                .indexOf(req.params.edu_id);
+
+                // splice out of array
+                profile.education.splice(removeIndex, 1);
+
+                // save
+                profile
+                    .save()
+                    .then(profile => {
+                        res.status(200).json({
+                            educationCount: profile.education.length,
+                            profileInfo : profile
+                        });
+                    })
+                    .catch(err => res.json(err));
+
+        })
+        .catch(err => res.json(err));
+});
 
 module.exports = router;
