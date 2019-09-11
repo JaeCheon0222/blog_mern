@@ -6,7 +6,8 @@ const profileModel = require('../../models/Profile');
 const userModel = require('../../models/User');
 const checkAuth = passport.authenticate('jwt', {session: false});
 const validateProfileInput = require('../../validation/profile');
-
+const validateEducationInput = require('../../validation/education');
+const validateExperienceInput = require('../../validation/experience');
 
 /**
  * @route GET /all
@@ -227,5 +228,73 @@ router.delete('/:profile_id', checkAuth, (req, res) => {
         .catch(err => res.json(err));
 
 });
+
+
+/**
+ * @route   POST /profile/education
+ * @desc    add education to profile
+ * @access  Private
+ */
+// post data를 server로 전송 하여 결과 값을 가지고 처리가 되는것
+// get data를 server에서 요청한다.
+router.post('/education', checkAuth, (req, res) => {
+
+    const {errors, isValid} = validateEducationInput(req.body);
+
+    // Check Validation 빈칸 체크를 먼저 한다.
+    if (!isValid) {
+        return res.status(404).json(errors);
+    }
+    // profileModel.findOne({ user: req.user.id })
+    //     .then(profile => {
+    //         const newEdu = {
+    //             school: req.body.school,
+    //             degree: req.body.degree,
+    //             fieldofstudy: req.body.fieldofstudy,
+    //             from: req.body.from,
+    //             to: req.body.to,
+    //             current: req.body.current,
+    //             description: req.body.description
+    //         };
+
+    //         // Add to exp array
+    //         profile.education.unshift(newEdu);
+    //         profile
+    //             .save()
+    //             .then(profile => res.json(profile))
+    //             .catch(err => res.status(404).json(err));
+    //     })
+    //     .catch(err => res.status(404).json(err));
+
+    profileModel
+        // checkAuth의 return 값
+        .findOne({ user: req.user.id })
+        .then(profile => {
+            const newEdu = {
+                school: req.body.school,
+                degree: req.body.degree,
+                fieldofstudy: req.body.fieldofstudy,
+                from: req.body.from,
+                to: req.body.to,
+                current: req.body.current,
+                description: req.body.description
+            };
+
+            // Add to exp array
+            profile.education.unshift(newEdu);
+            console.log(newEdu);
+            profile
+                .save()
+                .then(profile => res.status(200).json({
+                    msg: 'successful profile education',
+                    educationInfo: profile.education
+                }))
+                .catch(err => res.json(err));
+
+        })
+        .catch(err => res.json(err));
+
+}); 
+
 
 module.exports = router;

@@ -27,27 +27,10 @@ module.exports = function validateEducationInput(data) {
         errors.from = 'Profile from'
     }
 
+
     return {
         errors,
         isValid: isEmpty(errors)
-    }
-
-
-    // school: {
-    //     type: String,
-    //     required: true
-    // },
-    // degree: {
-    //     type: String,
-    //     required: true
-    // },
-    // fieldofstudy: {
-    //     type: String,
-    //     required: true
-    // },
-    // from: {
-    //     type: Date,
-    //     required: true
-    // },
+    };
 
 }
