@@ -21,6 +21,30 @@ router.get('/test', (req, res) => {
 });
 
 
+// @route   GET users/all
+// @desc    register user
+// @access  Public
+router.get('/all', (req, res) => {
+    
+    userModel
+        .find()
+        .exec()
+        .then(users => {
+            if (!users) {
+                res.status(404).json({
+                    msg: 'not founded users'
+                });
+            } else {
+                res.status(200).json({
+                    msg: 'successful users list',
+                    count: users.length,
+                    userList: users
+                });
+            }
+        })
+        .catch(err => res.json(err));
+});
+
 // @route   Post users/register
 // @desc    register user
 // @access  Public

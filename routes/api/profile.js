@@ -48,7 +48,14 @@ router.get('/', checkAuth, (req, res) => {
                 errors.noprofile = 'There is no profile for this user Id';
                 return res.status(401).json(errors);
             }
-            res.json(profile);
+            res.json({
+                msg: 'successful register profile',
+                profileInfo: profile,
+                request: {
+                    type: 'GET',
+                    url: 'http://localhost:3000/profile/all'
+                }
+            });
         })
         .catch(err => res.json(err));
 });
@@ -192,6 +199,30 @@ router.patch('/modify', checkAuth, (req, res) => {
                 errors.noprofile = 'No user Info';
                 return res.status(404).json(errors);
             }
+        })
+        .catch(err => res.json(err));
+
+});
+
+
+/**
+ * @route   DELETE /profile/:profile_id
+ * @desc    delete profile
+ * @access  Private
+ */
+router.delete('/:profile_id', checkAuth, (req, res) => {
+    
+    profileModel
+        .remove({_id: req.params.profile_id})
+        .exec()
+        .then(result => {
+            res.status(200).json({
+                msg: 'deleted user profile',
+                request: {
+                    type: 'GET',
+                    request: 'http://localhost:3000/profile/all'
+                }
+            });
         })
         .catch(err => res.json(err));
 
