@@ -157,10 +157,40 @@ router.delete('/delete/:postId', authCheck, (req, res) => {
                 .catch(err => res.json(err))
         })
         .catch(err => res.json(err));
-        
+});
 
-    
+/**
+ * @route   POST posts/like/:postId 
+ * @desc    Like post
+ * @access  Private
+ */
+router.post('/like/:postId', authCheck, (req, res) => {
+
+    // 어떤 유저가 눌렀는지
+    profileModel
+        .findOne({user: req.user.id})
+        .then(profile => {
+            postModel
+                .findById(req.params.postId)
+                .then(post => {
+                    // 한사람당 한번만 누름
+                    if (post.likes.filter(like => like.user.toString() === req.user.id).length > 0) {
+                        return res.status(400).json({
+                            msg: 'user already liked this post'
+                        });
+                    }
+                    // Add user id to likes array
+                    post.likes.unshift({user: req.user.id});
+                    post
+                        .save()
+                        .then(post => {
+                            res.json(post);
+                        });
+                })
+                .catch(err => res.json(err));
+        });
 
 });
+
 
 module.exports = router;
