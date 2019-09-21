@@ -1,5 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+const passport = require('passport');
+
+const postModel = require('../../models/post');
+
+const authCheck = passport.authenticate('jwt', {session: false});
 
 /**
  * @route   GET posts/test
