@@ -234,5 +234,36 @@ router.post('/unlike/:postId', authCheck, (req, res) => {
 
 });
 
+/**
+ * @route   POST posts/comment/:postId 
+ * @desc    Add comment tp post
+ * @access  Private
+ */
+router.post('/comment/:postId', authCheck, (req, res) => {
+
+    const {errors, isValid} = validatePostInput(req.body);
+
+    // check validation
+    if (!isValid) {
+        // if any errors, send 400 with errors object
+        return res.status(400).json(errors);
+    }
+
+    postModel.findById(req.params.postId)
+        .then(post => {
+            const newComment = {
+                text: req.body.text,
+                name: req.body.name,
+                avatar: req.body.avatar,
+                user: req.user.id
+            };
+            // add to comments array
+            post.comments.unshift(newComment);
+            // save
+            post.save().then(post => res.json(post));
+        })
+        .catch(err => res.json(err));
+
+});
 
 module.exports = router;
