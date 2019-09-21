@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 
 const postModel = require('../../models/post');
+const profileModel = require('../../models/Profile');
 
 // validation
 const validatePostInput = require('../../validation/posts');
@@ -16,9 +17,10 @@ const authCheck = passport.authenticate('jwt', {session: false});
  * @access  Public
  */
 router.get('/all', (req, res) => {
-    
+
     postModel
         .find()
+        .sort({date: -1}) // 최신 날짜 순 1은 오래된 순
         .populate('user', ['name', 'avatar'])
         .exec()
         .then(result => {
@@ -122,5 +124,43 @@ router.post('/register', authCheck, (req, res) => {
 
 });
 
+/**
+ * @route   DELETE posts/delete/:postId
+ * @desc    Delete post item
+ * @access  Private
+ */
+router.delete('/delete/:postId', authCheck, (req, res) => {
+
+    // 작성자가 맞는 지 확인
+    profileModel
+        .findOne({user: req.user.id})
+        .then(profile => {
+            console.log(profile);
+            postModel
+                .findById({_id: req.params.postId})
+                .then(post => {
+                    // check for post owner
+                    if (post.user.toString() !== req.user.id) {
+                        return res.status(404).json({
+                            noauthorized: 'User not authorized'
+                        });
+                    }
+                    post
+                        .remove()
+                        .then(()=> {
+                            res.json({
+                                msg: 'Success remove post',
+                                success: true
+                            });
+                        })
+                })
+                .catch(err => res.json(err))
+        })
+        .catch(err => res.json(err));
+        
+
+    
+
+});
 
 module.exports = router;

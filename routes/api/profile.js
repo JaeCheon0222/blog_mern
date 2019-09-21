@@ -351,6 +351,8 @@ router.delete('/experience/:exp_id', checkAuth, (req, res) => {
 */
 router.delete('/education/:edu_id', checkAuth, (req, res) => {
 
+    console.log(req.user.id);
+
     profileModel
         // 유저의 아이디 먼저 찾음
         .findOne({user: req.user.id})
