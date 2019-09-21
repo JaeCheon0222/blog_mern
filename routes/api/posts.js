@@ -192,5 +192,47 @@ router.post('/like/:postId', authCheck, (req, res) => {
 
 });
 
+/**
+ * @route   POST posts/unlike/:postId 
+ * @desc    unlike post
+ * @access  Private
+ */
+router.post('/unlike/:postId', authCheck, (req, res) => {
+
+    // 좋아요를 눌렀었는지 확인
+    profileModel
+        .findOne({user: req.user.id})
+        .then(profile => {
+            postModel
+                .findById(req.params.postId)
+                .then(post => {
+                    if (post.likes.filter(like => like.user.toString() === req.user.id).length === 0) {
+                        return res.status(400).json({
+                            notliked: 'You have not liked this post'
+                        });
+                    }
+
+                    // get remove index
+                    const removeIndex = post.likes
+                        .map(item => item.user.toString())
+                        .indexOf(req.user.id);
+                    
+                    // splice out of array
+                    post.likes.splice(removeIndex, 1);
+                    
+                    // save
+                    post
+                        .save()
+                        .then(post => {
+                            res.json(post)
+                        });
+
+                })
+
+        })
+        .catch(err => res.json(err));
+
+});
+
 
 module.exports = router;
