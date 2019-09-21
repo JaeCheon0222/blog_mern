@@ -266,4 +266,54 @@ router.post('/comment/:postId', authCheck, (req, res) => {
 
 });
 
+/**
+ * @route   DELETE posts/comment/:postId/:commentId 
+ * @desc    Remove comment from post
+ * @access  Private
+ */
+// router.delete('/comment/:postId/:commentId', authCheck, (req, res) => {
+
+//     postModel
+//         .findById(req.params.postId)
+//         .then(post => {
+//             // comment를 달았는지 확인
+//             if (post.comments.filter(comment._id.toString() === req.params.commentId).length === 0) {
+//                 return res.status(404).json({commentnotextists: 'Comment dose not exist'});
+//             }
+
+//             // get remove index, 지울 것
+//             const removeIndex = post.comments
+//                 .map(item => item._id.toString())
+//                 .indexOf(req.params.commentId);
+
+//             // splice comment out of array
+//             post.comments.splice(removeIndex, 1);
+            
+//             // save
+//             post.save().then(post => res.json(post));
+
+//         })
+//         .catch(err => res.json(err));
+
+// });
+
+router.delete('/comment/:postId/:commentId', authCheck, (req,res) => {
+    postModel
+        .findById(req.params.postId)
+        .then(post => {
+            if(post.comments.filter(comment => comment._id.toString() === req.params.commentId).length === 0){
+                return res.status(400).json({
+                    msg: 'Comment does not exist'
+                });
+
+            }
+            const removeIndex = post.comments
+                .map(item => item._id.toString())
+                .indexOf(req.params.commentId);
+            post.comments.splice(removeIndex, 1);
+            post.save().then(post => res.json(post));
+        });
+
+});
+
 module.exports = router;
