@@ -5,17 +5,40 @@ const passport = require('passport');
 
 const postModel = require('../../models/post');
 
+// validation
+const validatePostInput = require('../../validation/posts');
+
 const authCheck = passport.authenticate('jwt', {session: false});
 
 /**
- * @route   GET posts/test
- * @desc    tests posts route
- * @access  Public
+ * @route   POST posts/register
+ * @desc    Create post
+ * @access  Private
  */
-router.get('/test', (req, res) => {
-    res.status(200).json({
-        msg: "posts works"
+router.post('/register', authCheck, (req, res) => {
+
+    const {errors, isValid} = validatePostInput(req.body);
+
+    // Check validation
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+
+    const newPost = new postModel({
+        text: req.body.text,
+        name: req.body.name,
+        avatar: req.body.avatar,
+        user: req.user.id
     });
+
+    // post save
+    newPost.save()
+        .then(post => {
+            res.json(post);
+        })
+        .catch(err => res.status(404).json(err));
+
 });
+
 
 module.exports = router;
