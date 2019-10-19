@@ -25,6 +25,8 @@ dotEnv.config();
 // passport middleware
 app.use(passport.initialize());
 
+app.use('/uploads/', express.static('uploads'));
+
 // passport config
 require('./config/passport')(passport);
 

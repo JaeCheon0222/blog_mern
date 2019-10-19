@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
-
+const multer = require('multer');
+const upload = multer({ dest: 'uploads' })
 const postModel = require('../../models/post');
 const profileModel = require('../../models/Profile');
 
@@ -10,6 +11,34 @@ const profileModel = require('../../models/Profile');
 const validatePostInput = require('../../validation/posts');
 
 const authCheck = passport.authenticate('jwt', {session: false});
+
+const storage = multer.diskStorage({
+    // 도착지 (어떻게 저장)
+    destination: function(req, file, cb) {
+        cb(null, 'uploads');
+    },
+    // 파일네임
+    filename: function(req, file, cb) {
+        cb(null, new Date().toISOString() + file.originalname);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    // 파일 타입 (현재는 이미지만)
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+}
+
+// const upload = multer({
+//     dest: storage,
+//     limits: {
+//         fileSize: 1024 * 1024 * 5
+//     },
+//     fileFilter: fileFilter
+// });
 
 /**
  * @route   GET posts/all
@@ -99,7 +128,7 @@ router.get('/:postsId', (req, res) => {
  * @desc    Create post
  * @access  Private
  */
-router.post('/register', authCheck, (req, res) => {
+router.post('/register', authCheck, upload.single('attachedfile'), (req, res) => {
 
     const {errors, isValid} = validatePostInput(req.body);
 
@@ -110,9 +139,10 @@ router.post('/register', authCheck, (req, res) => {
 
     const newPost = new postModel({
         text: req.body.text,
-        name: req.body.name,
-        avatar: req.body.avatar,
-        user: req.user.id
+        name: req.user.name,
+        avatar: req.user.avatar,
+        user: req.user.id,
+        attachedfile: req.file.path
     });
 
     // post save
@@ -265,6 +295,7 @@ router.post('/comment/:postId', authCheck, (req, res) => {
         .catch(err => res.json(err));
 
 });
+
 
 /**
  * @route   DELETE posts/comment/:postId/:commentId 

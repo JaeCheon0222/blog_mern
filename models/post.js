@@ -13,6 +13,9 @@ const PostSchema = new Schema({
     name:{
         type: String
     },
+    attachedfile:{
+        type: String
+    },
     avatar:{
         type: String
     },
